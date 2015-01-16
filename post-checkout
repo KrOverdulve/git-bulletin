@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 #
 # A hook script that is able to interpret important messages, notifications
 # and breaking changes as meta data in commit messages. Either a developer
@@ -28,21 +28,62 @@
 #
 #       Not included in bulletin anymore
 #
-set -e
 
-prevHEAD=$1
-newHEAD=$2
-checkoutType=$3
-checkoutName=''
+KEY = 'Bulletin'
+$has_bulletins = false
 
-[[ $checkoutType == 1 ]] && checkoutName='branch' ||
-                            checkoutName='file' ;
+# Helper functions
 
-# TODO Only show when there are any
-printf '\n\n\e[0;31m!! Important bulletins:\n'
-for commit in `git rev-list $prevHEAD..$newHEAD`
-do
-  commitmessage=`git show -s --format=%B $commit`
-  bulletin=`.git/hooks/interpret-commit-message.rb $commit "$commitmessage"`
-  printf "$bulletin"
-done
+def create_bulletin(commit, bulletin)
+  if !$has_bulletins
+    $has_bulletins = true
+    printf "\n\e[0;31m!! Important bulletins:\n"
+  end
+
+  printf "\e[0;32mCommit: #{commit}\n"
+  printf "\e[0;32mBulletin: \e[0m#{bulletin}\n"
+end
+
+def process_commit_message(commit, commitmessage)
+  multilineBulletin = nil
+
+  commitmessage.split("\n").each do |line|
+    if multilineBulletin != nil
+      # Continue reading until empty line reached
+      if line.strip == ""
+        create_bulletin commit, multilineBulletin
+        multilineBulletin = nil
+      else
+        multilineBulletin += line + "\n"
+      end
+    else
+      if line == KEY
+        # Multiline bulletin starts
+        multilineBulletin = ""
+      elsif line.index("#{KEY}:")
+        # Single line bulletin
+        singleLineBulletinIndex = line.index("#{KEY}:")
+        singlelineBulletin = line[(singleLineBulletinIndex + "#{KEY}:".length)..-1] + '\n'
+        create_bulletin commit, singlelineBulletin
+      end
+    end
+  end
+
+  create_bulletin commit, multilineBulletin if multilineBulletin != nil
+end
+
+def show_bulletins_between(prevHEAD, newHEAD)
+  commits_in_between = `git rev-list #{prevHEAD}..#{newHEAD}`
+  commits_in_between.split("\n").each do |commit|
+    commit_message = `git show -s --format=%B #{commit}`
+    process_commit_message commit, commit_message
+  end
+end
+
+# Actual execution
+
+prevHEAD = ARGV[0]
+newHEAD = ARGV[1]
+checkoutType = ARGV[2]
+
+show_bulletins_between prevHEAD, newHEAD
