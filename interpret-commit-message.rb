@@ -2,8 +2,8 @@
 KEY = 'Bulletin'
 
 def createBulletin(commit, bulletin)
-  printf "Commit: #{commit}\n"
-  printf "Bulletin:\n#{bulletin}"
+  printf "\e[0;32mCommit: #{commit}\n"
+  printf "\e[0;32mBulletin: \e[0m#{bulletin}"
   printf '\n'
 end
 

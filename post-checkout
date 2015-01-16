@@ -39,7 +39,7 @@ checkoutName=''
                             checkoutName='file' ;
 
 # TODO Only show when there are any
-printf '\n\n!! Important bulletins:\n'
+printf '\n\n\e[0;31m!! Important bulletins:\n'
 for commit in `git rev-list $prevHEAD..$newHEAD`
 do
   commitmessage=`git show -s --format=%B $commit`
