@@ -40,8 +40,8 @@ def create_bulletin(commit, bulletin)
     printf "\n\e[0;31m!! Important bulletins:\n"
   end
 
-  printf "\e[0;32mCommit: #{commit}\n"
-  printf "\e[0;32mBulletin: \e[0m#{bulletin}\n"
+  printf "\e[0;31mBULLETIN \e[0;32m(commit: #{commit})\n"
+  printf "\e[0m#{bulletin}\n"
 end
 
 def process_commit_message(commit, commitmessage)
