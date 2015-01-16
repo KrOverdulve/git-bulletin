@@ -30,15 +30,19 @@
 #
 set -e
 
-printf '\npost-checkout hook\n\n'
-
 prevHEAD=$1
 newHEAD=$2
 checkoutType=$3
+checkoutName=''
 
-[[ $checkoutType == 1 ]] && checkoutType='branch' ||
-                            checkoutType='file' ;
+[[ $checkoutType == 1 ]] && checkoutName='branch' ||
+                            checkoutName='file' ;
 
-echo 'Checkout type: '$checkoutType
-echo '    prev HEAD: '`git name-rev --name-only $prevHEAD`
-echo '     new HEAD: '`git name-rev --name-only $newHEAD`
+# TODO Only show when there are any
+printf '\n\n!! Important bulletins:\n'
+for commit in `git rev-list $prevHEAD..$newHEAD`
+do
+  commitmessage=`git show -s --format=%B $commit`
+  bulletin=`.git/hooks/interpret-commit-message.rb $commit "$commitmessage"`
+  printf "$bulletin"
+done
