@@ -9,7 +9,8 @@ general, they will see the bulletins to get them up to date.
 
 ## Installation
 
-Copy paste these files into .git/hooks/.
+Copy paste these files into .git/hooks/. Make sure the `postcheckout` file is executable by doing e.g. `chmod +x .git/hooks/postcheckout`.
+
 
 ## How to use
 
